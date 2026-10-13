@@ -1,0 +1,6 @@
+*.wav
+*__*__*
+*.pyxel
+*_archive
+score/tracks/instrument/
+*output*/
