@@ -31,7 +31,7 @@ def draw_at(t: float) -> None:
 class App:
     def __init__(self):
         pyxel.init(WIDTH, HEIGHT, title="My Pyxel App", fps=SETTINGS.fps)
-        wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate)
+        wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate, SETTINGS.master_gain)
         play_audio(wave, SETTINGS.sample_rate)
         pyxel.run(self.update, self.draw)
 
@@ -60,7 +60,7 @@ def export_instrument_samples() -> None:
 
 def export_audio_only(output_path: str) -> None:
     """映像を一切介さず、音声のwavだけを書き出す(試聴用の高速確認向け)。"""
-    wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate)
+    wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate, SETTINGS.master_gain)
     write_wav(output_path, wave, SETTINGS.sample_rate)
     print(f"exported (audio only): {output_path}")
 
@@ -74,7 +74,7 @@ def export(output_path: str) -> None:
     未文書化の挙動)。そのため、render_frames()を呼ぶ前に必要なパスをすべて
     絶対パスへ変換しておく。
     """
-    wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate)
+    wave = render_song(TRACKS, SETTINGS.bpm, SETTINGS.sample_rate, SETTINGS.master_gain)
     wav_path = str(Path(f"{SETTINGS.output_dir}/song.wav").resolve())
     write_wav(wav_path, wave, SETTINGS.sample_rate)
 

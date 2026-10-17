@@ -6,9 +6,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 _PROJECT_ROOT = Path(__file__).resolve().parent
+
+# ターミナル側に同名の環境変数が残っていても(VSCodeが起動時に.envを注入する等)、
+# 常に.envの現在の内容を優先する。
+load_dotenv(_PROJECT_ROOT / ".env", override=True)
 
 
 @dataclass(frozen=True)

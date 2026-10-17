@@ -59,11 +59,13 @@ def mix_tracks(tracks: Sequence[np.ndarray]) -> np.ndarray:
     return mix
 
 
-def normalize_audio(samples: np.ndarray, peak: float = 0.95) -> np.ndarray:
+def limit_peak(samples: np.ndarray, peak: float = 0.95) -> np.ndarray:
+    """ピークがpeakを超えるときだけ全体を縮めて音割れを防ぐ。peak以下の音は
+    そのまま返すので、velocity/gain/master_gainで下げた音量が打ち消されない。"""
     if samples.size == 0:
         return samples
     max_abs = float(np.max(np.abs(samples)))
-    if max_abs <= 1e-9:
+    if max_abs <= peak:
         return samples
     return samples * (peak / max_abs)
 
@@ -74,9 +76,14 @@ def write_wav(path: str | Path, samples: np.ndarray, sample_rate: int, subtype: 
     sf.write(str(path), samples.astype(np.float32), sample_rate, subtype=subtype)
 
 
-def render_song(track_configs: Sequence, bpm: float, sample_rate: int) -> np.ndarray:
+def render_song(
+    track_configs: Sequence, bpm: float, sample_rate: int, master_gain: float = 1.0
+) -> np.ndarray:
     """score/tracks/registry.py の TRACKS を受け取り、有効なパートをすべて
-    レンダリング・ミックスして1本のnp.ndarrayを返す。"""
+    レンダリング・ミックスして1本のnp.ndarrayを返す。
+
+    最終的な音量は velocity × TrackConfig.gain × master_gain で決まる。
+    """
     rendered_tracks: list[np.ndarray] = []
     for track in track_configs:
         if not track.enabled:
@@ -89,4 +96,4 @@ def render_song(track_configs: Sequence, bpm: float, sample_rate: int) -> np.nda
         track_wave = render_track(events, bpm, sample_rate, renderer)
         rendered_tracks.append(track_wave * track.gain)
 
-    return normalize_audio(mix_tracks(rendered_tracks))
+    return limit_peak(mix_tracks(rendered_tracks) * master_gain)
